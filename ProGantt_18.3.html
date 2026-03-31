@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ProGantt Studio - v18.3 (Signed Release)</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin="anonymous" src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin="anonymous" src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SheetJS (XLSX) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
+        
+        /* CURSORS */
+        .cursor-eraser { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="%23dc2626" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>') 12 12, pointer; }
+        .cursor-connect { cursor: crosshair; }
+        .cursor-ew-resize { cursor: ew-resize; }
+        .cursor-grab { cursor: default; } 
+        .cursor-grabbing { cursor: grabbing; }
+        
+        /* GANTT ELEMENTS */
+        .task-bar { transition: filter 0.2s; }
+        .task-bar:hover { filter: brightness(1.1); }
+        .progress-overlay { pointer-events: none; }
+
+        /* SELECTION HIGHLIGHT */
+        .selected-task { stroke: #4f46e5; stroke-width: 2px; stroke-dasharray: 4; animation: dash 1s linear infinite; }
+        .selected-row { background-color: #e0e7ff !important; border-left: 3px solid #4f46e5 !important; }
+
+        @keyframes dash {
+            to { stroke-dashoffset: 8; }
+        }
+
+        /* HANDLES & NODES */
+        .resize-handle { opacity: 0; transition: opacity 0.2s; fill: white; stroke: rgba(0,0,0,0.2); }
+        .task-group:hover .resize-handle { opacity: 1; }
+        
+        .connector-node { opacity: 0; transition: all 0.2s; }
+        .task-group:hover .connector-node { opacity: 1; }
+        .connector-node:hover { r: 7; }
+
+        /* GRID LINES */
+        .grid-line-week { stroke: #cbd5e1; stroke-width: 1; } 
+        .grid-line-month { stroke: #94a3b8; stroke-width: 2; }
+        .grid-line-quarter { stroke: #64748b; stroke-width: 2; stroke-dasharray: 4; }
+
+        .dep-line-hitbox { stroke: transparent; stroke-width: 15px; cursor: pointer; }
+        .dep-line-hitbox:hover + .dep-line { stroke: #dc2626; stroke-width: 3px; }
+
+        /* INPUT STYLING */
+        input[type="color"] { -webkit-appearance: none; border: none; width: 20px; height: 20px; padding: 0; overflow: hidden; background: none; cursor: pointer; border-radius: 4px; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(0,0,0,0.2); border-radius: 4px; }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 3px solid #f1f5f9; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* HIDE SCROLLBAR FOR LEFT PANEL */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* FORCE VERTICAL SCROLLBAR ON CHART */
+        .force-vertical-scroll { overflow-y: auto !important; }
+
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #4f46e5; cursor: pointer; margin-top: -5px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
+        input[type=range]:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+<script data-injected="true">window.__PRELOADED_STATE__ = "[{\"id\":\"slot_1\",\"name\":\"Project 2026 Alpha\",\"color\":\"#3b82f6\",\"tasks\":[{\"id\":\"t1\",\"name\":\"System Architecture\",\"start\":\"2026-01-05\",\"duration\":15,\"progress\":77,\"category\":\"design\",\"expanded\":true,\"dependencies\":[],\"subtasks\":[{\"id\":\"t1-1\",\"name\":\"Database Schema\",\"start\":\"2026-01-06\",\"duration\":5,\"progress\":100,\"category\":\"design\",\"dependencies\":[]},{\"id\":\"t1-2\",\"name\":\"API Specification\",\"start\":\"2026-01-11\",\"duration\":7,\"progress\":60,\"category\":\"design\",\"dependencies\":[\"t1-1\"]}]},{\"id\":\"t2\",\"name\":\"Core Development\",\"start\":\"2026-01-22\",\"duration\":20,\"progress\":40,\"category\":\"software\",\"expanded\":true,\"dependencies\":[\"t1\"],\"subtasks\":[]}]},{\"id\":\"slot_2\",\"name\":\"Project Slot 2\",\"color\":\"#f97316\",\"tasks\":[]},{\"id\":\"slot_3\",\"name\":\"Project Slot 3\",\"color\":\"#10b981\",\"tasks\":[]},{\"id\":\"slot_4\",\"name\":\"Project Slot 4\",\"color\":\"#8b5cf6\",\"tasks\":[]},{\"id\":\"slot_5\",\"name\":\"Project Slot 5\",\"color\":\"#eab308\",\"tasks\":[]},{\"id\":\"slot_6\",\"name\":\"Project Slot 6\",\"color\":\"#ec4899\",\"tasks\":[]},{\"id\":\"slot_7\",\"name\":\"Project Slot 7\",\"color\":\"#64748b\",\"tasks\":[]},{\"id\":\"slot_8\",\"name\":\"Project Slot 8\",\"color\":\"#06b6d4\",\"tasks\":[]}]";</script><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.invisible{visibility:hidden}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.bottom-2{bottom:0.5rem}.left-0{left:0px}.right-3{right:0.75rem}.top-0{top:0px}.z-0{z-index:0}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.-mb-\[1px\]{margin-bottom:-1px}.mb-0\.5{margin-bottom:0.125rem}.mb-1{margin-bottom:0.25rem}.ml-1{margin-left:0.25rem}.mr-1{margin-right:0.25rem}.mt-2{margin-top:0.5rem}.block{display:block}.flex{display:flex}.hidden{display:none}.h-screen{height:100vh}.h-full{height:100%}.h-1{height:0.25rem}.h-10{height:2.5rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-8{height:2rem}.h-\[100px\]{height:100px}.h-\[40px\]{height:40px}.min-h-\[100px\]{min-height:100px}.min-h-full{min-height:100%}.w-1{width:0.25rem}.w-10{width:2.5rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-20{width:5rem}.w-28{width:7rem}.w-32{width:8rem}.w-6{width:1.5rem}.w-8{width:2rem}.w-full{width:100%}.w-px{width:1px}.min-w-0{min-width:0px}.min-w-\[160px\]{min-width:160px}.min-w-max{min-width:max-content}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.cursor-col-resize{cursor:col-resize}.cursor-ew-resize{cursor:ew-resize}.cursor-grab{cursor:grab}.cursor-move{cursor:move}.cursor-not-allowed{cursor:not-allowed}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.appearance-none{-webkit-appearance:none;appearance:none}.flex-col{flex-direction:column}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-4{gap:1rem}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-t-lg{border-top-left-radius:0.5rem;border-top-right-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-none{border-style:none}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-green-200{--tw-border-opacity:1;border-color:rgb(187 247 208 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-transparent{border-color:transparent}.border-b-slate-200{--tw-border-opacity:1;border-bottom-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-b-white{--tw-border-opacity:1;border-bottom-color:rgb(255 255 255 / var(--tw-border-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-300{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.bg-slate-50\/50{background-color:rgb(248 250 252 / 0.5)}.bg-transparent{background-color:transparent}.bg-violet-100{--tw-bg-opacity:1;background-color:rgb(237 233 254 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.pb-0{padding-bottom:0px}.pl-4{padding-left:1rem}.pr-1{padding-right:0.25rem}.pr-4{padding-right:1rem}.pt-2{padding-top:0.5rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-\[10px\]{font-size:10px}.text-\[14px\]{font-size:14px}.text-\[16px\]{font-size:16px}.text-\[18px\]{font-size:18px}.text-\[20px\]{font-size:20px}.text-\[7px\]{font-size:7px}.text-\[8px\]{font-size:8px}.text-\[9px\]{font-size:9px}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-tight{line-height:1.25}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-violet-700{--tw-text-opacity:1;color:rgb(109 40 217 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.accent-indigo-600{accent-color:#4f46e5}.opacity-0{opacity:0}.opacity-50{opacity:0.5}.opacity-60{opacity:0.6}.opacity-80{opacity:0.8}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.drop-shadow-md{--tw-drop-shadow:drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:border-indigo-500:hover{--tw-border-opacity:1;border-color:rgb(99 102 241 / var(--tw-border-opacity, 1))}.hover\:bg-red-50:hover{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:text-emerald-600:hover{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.hover\:text-green-600:hover{--tw-text-opacity:1;color:rgb(22 163 74 / var(--tw-text-opacity, 1))}.hover\:text-indigo-600:hover{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.hover\:text-red-500:hover{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.hover\:text-slate-500:hover{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.hover\:opacity-100:hover{opacity:1}.focus\:border-indigo-500:focus{--tw-border-opacity:1;border-color:rgb(99 102 241 / var(--tw-border-opacity, 1))}.focus\:bg-white:focus{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-0:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-indigo-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(99 102 241 / var(--tw-ring-opacity, 1))}.group:hover .group-hover\:opacity-100{opacity:1}</style><script data-injected="true">window.__PRELOADED_STATE__ = "[{\"id\":\"slot_1\",\"name\":\"Project 2026 Alpha\",\"color\":\"#3b82f6\",\"tasks\":[{\"id\":\"t1\",\"name\":\"System Architecture\",\"start\":\"2026-01-05\",\"duration\":15,\"progress\":77,\"category\":\"design\",\"expanded\":true,\"dependencies\":[],\"subtasks\":[{\"id\":\"t1-1\",\"name\":\"Database Schema\",\"start\":\"2026-01-06\",\"duration\":5,\"progress\":100,\"category\":\"design\",\"dependencies\":[]},{\"id\":\"t1-2\",\"name\":\"API Specification\",\"start\":\"2026-01-11\",\"duration\":7,\"progress\":60,\"category\":\"design\",\"dependencies\":[\"t1-1\"]}]},{\"id\":\"t2\",\"name\":\"Core Development\",\"start\":\"2026-01-22\",\"duration\":20,\"progress\":40,\"category\":\"software\",\"expanded\":true,\"dependencies\":[\"t1\"],\"subtasks\":[]}]},{\"id\":\"slot_2\",\"name\":\"Project Slot 2\",\"color\":\"#f97316\",\"tasks\":[]},{\"id\":\"slot_3\",\"name\":\"Project Slot 3\",\"color\":\"#10b981\",\"tasks\":[]},{\"id\":\"slot_4\",\"name\":\"Project Slot 4\",\"color\":\"#8b5cf6\",\"tasks\":[]},{\"id\":\"slot_5\",\"name\":\"Project Slot 5\",\"color\":\"#eab308\",\"tasks\":[]},{\"id\":\"slot_6\",\"name\":\"Project Slot 6\",\"color\":\"#ec4899\",\"tasks\":[]},{\"id\":\"slot_7\",\"name\":\"Project Slot 7\",\"color\":\"#64748b\",\"tasks\":[]},{\"id\":\"slot_8\",\"name\":\"Project Slot 8\",\"color\":\"#06b6d4\",\"tasks\":[]}]";</script></head>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+<!-- The root MUST be empty for React to mount correctly on reload -->
+<div id="root" class="h-full flex flex-col"></div>
+
+<script type="text/babel">
+    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+    // --- UTILITIES ---
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    
+    const toDateStr = (date) => {
+        try { return date.toISOString().split('T')[0]; } 
+        catch (e) { return new Date().toISOString().split('T')[0]; }
+    };
+    
+    const addDays = (dateStr, days) => {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        d.setDate(d.getDate() + days);
+        return toDateStr(d);
+    };
+
+    const diffDays = (start, end) => Math.round((new Date(end) - new Date(start)) / ONE_DAY);
+    const getWeekNum = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    };
+    const formatWeekRange = (date) => {
+        const start = new Date(date);
+        const end = new Date(date);
+        end.setDate(end.getDate() + 6);
+        const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `${fmt(start)} - ${fmt(end)}`;
+    };
+
+    // --- CONFIG ---
+    const ROW_HEIGHT = 40; 
+    
+    const CATEGORIES = {
+        software: { label: 'Software', bg: 'bg-blue-100 text-blue-700', stroke: '#2563eb', fill: '#3b82f6' },
+        hardware: { label: 'Hardware', bg: 'bg-orange-100 text-orange-700', stroke: '#ea580c', fill: '#f97316' },
+        design: { label: 'Design', bg: 'bg-violet-100 text-violet-700', stroke: '#7c3aed', fill: '#8b5cf6' },
+        experiments: { label: 'Experiments', bg: 'bg-pink-100 text-pink-700', stroke: '#be185d', fill: '#ec4899' }, 
+        proto: { label: 'Prototyping', bg: 'bg-yellow-100 text-yellow-700', stroke: '#ca8a04', fill: '#eab308' },
+        test_ver: { label: 'Test & Verification', bg: 'bg-emerald-100 text-emerald-700', stroke: '#059669', fill: '#10b981' },
+        qa: { label: 'Quality Assurance', bg: 'bg-teal-100 text-teal-700', stroke: '#0d9488', fill: '#14b8a6' },
+        field_test: { label: 'Field Test', bg: 'bg-amber-100 text-amber-800', stroke: '#d97706', fill: '#f59e0b' },
+        deploy: { label: 'Deployment', bg: 'bg-slate-200 text-slate-700', stroke: '#475569', fill: '#64748b' }
+    };
+
+    // --- DATA INIT ---
+    const generateInitialProjects = () => {
+        if (window.__PRELOADED_STATE__) {
+            try {
+                return JSON.parse(window.__PRELOADED_STATE__);
+            } catch(e) { console.error("Failed to load preloaded state", e); }
+        }
+        const colors = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#eab308', '#ec4899', '#64748b', '#06b6d4'];
+        return Array.from({ length: 8 }).map((_, i) => ({
+            id: `slot_${i+1}`,
+            name: i === 0 ? 'Project 2026 Alpha' : `Project Slot ${i+1}`,
+            color: colors[i],
+            tasks: i === 0 ? [
+                { 
+                    id: 't1', name: 'System Architecture', start: '2026-01-05', duration: 15, progress: 77, category: 'design', 
+                    expanded: true, 
+                    dependencies: [],
+                    subtasks: [
+                        { id: 't1-1', name: 'Database Schema', start: '2026-01-06', duration: 5, progress: 100, category: 'design', dependencies: [] },
+                        { id: 't1-2', name: 'API Specification', start: '2026-01-10', duration: 7, progress: 60, category: 'design', dependencies: ['t1-1'] }
+                    ]
+                },
+                { 
+                    id: 't2', name: 'Core Development', start: '2026-01-22', duration: 20, progress: 40, category: 'software', 
+                    expanded: true,
+                    dependencies: ['t1'],
+                    subtasks: []
+                }
+            ] : []
+        }));
+    };
+
+    // --- HELPER FUNCTIONS ---
+    const flattenAllTasks = (tasks) => {
+        let flat = [];
+        tasks.forEach(t => {
+            flat.push(t);
+            if(t.subtasks && t.subtasks.length > 0) {
+                flat = flat.concat(flattenAllTasks(t.subtasks));
+            }
+        });
+        return flat;
+    };
+
+    const findParentOfTask = (tasks, childId, parent = null) => {
+        for (let t of tasks) {
+            if (t.id === childId) return parent;
+            if (t.subtasks) {
+                const found = findParentOfTask(t.subtasks, childId, t);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const findTaskById = (tasks, id) => {
+        for (let t of tasks) {
+            if (t.id === id) return t;
+            if (t.subtasks) {
+                const found = findTaskById(t.subtasks, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    // --- EXCEL VISUAL MASTER EXPORT ---
+    const exportToExcel = (projects, viewStart, viewWeeks) => {
+        const wb = XLSX.utils.book_new();
+        const DATA_COL_COUNT = 8; 
+
+        projects.forEach((proj, idx) => {
+            if (!proj.tasks || proj.tasks.length === 0) return;
+
+            const ws_data = [];
+            const merges = [];
+
+            // --- 1. HEADER ROWS GENERATION (Calendar) ---
+            const rowYear = new Array(DATA_COL_COUNT).fill('');
+            const rowQuarter = new Array(DATA_COL_COUNT).fill('');
+            const rowMonth = new Array(DATA_COL_COUNT).fill('');
+            const rowWeek = ['ID', 'Level', 'Task Name', 'Start Date', 'End Date', 'Duration', 'Progress', 'Category'];
+
+            // Fill header visual styling
+            rowYear[0] = "YEAR";
+            rowQuarter[0] = "QUARTER";
+            rowMonth[0] = "MONTH";
+
+            let currentDate = new Date(viewStart);
+            let colIdx = DATA_COL_COUNT + 1; 
+
+            // Trackers for merging
+            let lastYear = null, lastQ = null, lastMonth = null;
+            let startYearCol = colIdx, startQCol = colIdx, startMonthCol = colIdx;
+
+            for (let i = 0; i < viewWeeks; i++) {
+                const y = currentDate.getFullYear();
+                const m = currentDate.toLocaleDateString('en-US', { month: 'short' });
+                const q = `Q${Math.floor(currentDate.getMonth() / 3) + 1}`;
+                const w = `W${getWeekNum(currentDate)}`;
+
+                // Fill Row Data
+                rowYear.push(y);
+                rowQuarter.push(q);
+                rowMonth.push(m);
+                rowWeek.push(w);
+
+                // --- MERGE LOGIC ---
+                // Year Merge
+                if (y !== lastYear) {
+                    if (lastYear !== null) {
+                        merges.push({ s: { r: 0, c: startYearCol - 1 }, e: { r: 0, c: colIdx - 2 } });
+                    }
+                    lastYear = y;
+                    startYearCol = colIdx;
+                }
+                // Quarter Merge
+                if (q !== lastQ) {
+                    if (lastQ !== null) {
+                        merges.push({ s: { r: 1, c: startQCol - 1 }, e: { r: 1, c: colIdx - 2 } });
+                    }
+                    lastQ = q;
+                    startQCol = colIdx;
+                }
+                // Month Merge
+                if (m !== lastMonth) {
+                    if (lastMonth !== null) {
+                        merges.push({ s: { r: 2, c: startMonthCol - 1 }, e: { r: 2, c: colIdx - 2 } });
+                    }
+                    lastMonth = m;
+                    startMonthCol = colIdx;
+                }
+
+                currentDate.setDate(currentDate.getDate() + 7);
+                colIdx++;
+            }
+            // Close final merges
+            merges.push({ s: { r: 0, c: startYearCol - 1 }, e: { r: 0, c: colIdx - 2 } });
+            merges.push({ s: { r: 1, c: startQCol - 1 }, e: { r: 1, c: colIdx - 2 } });
+            merges.push({ s: { r: 2, c: startMonthCol - 1 }, e: { r: 2, c: colIdx - 2 } });
+
+            ws_data.push(rowYear);
+            ws_data.push(rowQuarter);
+            ws_data.push(rowMonth);
+            ws_data.push(rowWeek);
+
+            // --- 2. TASK ROWS GENERATION ---
+            const traverse = (tasks, level) => {
+                tasks.forEach(task => {
+                    const row = [];
+                    // Meta Data
+                    row.push(task.id);
+                    row.push(level);
+                    row.push('  '.repeat(level) + task.name); // Visual Indent
+                    row.push(task.start);
+                    row.push(addDays(task.start, task.duration));
+                    row.push(task.duration);
+                    row.push(task.progress + '%');
+                    row.push(CATEGORIES[task.category]?.label || task.category);
+
+                    // Timeline Visuals
+                    const taskStart = new Date(task.start);
+                    const viewStartObj = new Date(viewStart);
+                    
+                    // Calculate offset in weeks
+                    const diffTime = taskStart - viewStartObj;
+                    const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+                    const durationWeeks = Math.ceil(task.duration / 7);
+
+                    // Padding for timeline start
+                    for(let k=0; k < diffWeeks; k++) row.push("");
+
+                    // Draw Bar
+                    for(let k=0; k < durationWeeks; k++) {
+                        if(diffWeeks + k >= 0 && diffWeeks + k < viewWeeks) {
+                            row.push("███"); // Visual Bar using Block Character
+                        }
+                    }
+
+                    ws_data.push(row);
+
+                    if (task.subtasks && task.subtasks.length > 0) {
+                        traverse(task.subtasks, level + 1);
+                    }
+                });
+            };
+
+            traverse(proj.tasks, 0);
+
+            // --- 3. SHEET CREATION ---
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            ws['!merges'] = merges;
+
+            // Column Widths
+            const cols = [
+                { wch: 10 }, { wch: 5 }, { wch: 40 }, { wch: 12 }, 
+                { wch: 12 }, { wch: 8 }, { wch: 10 }, { wch: 15 }
+            ];
+            // Timeline columns narrow
+            for(let i=0; i<viewWeeks; i++) cols.push({ wch: 3 });
+            ws['!cols'] = cols;
+
+            const sheetName = (proj.name || `Project ${idx+1}`).replace(/[\\\/?*\[\]]/g, '').substring(0, 30);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+
+        // UPDATED: Filename with Date and Time
+        const now = new Date();
+        const datePart = now.toISOString().slice(0,10);
+        const timePart = now.getHours().toString().padStart(2,'0') + "-" + now.getMinutes().toString().padStart(2,'0');
+        XLSX.writeFile(wb, `ProGantt_Visual_Export_${datePart}_${timePart}.xlsx`);
+    };
+
+    // --- PIPELINE LOGIC (Auto-Resize & Calc) ---
+    const applyPipeline = (currentTasks) => {
+        const tasksClone = JSON.parse(JSON.stringify(currentTasks));
+        
+        const getFlatMap = (list, map = new Map()) => {
+            list.forEach(t => {
+                map.set(t.id, t);
+                if(t.subtasks) getFlatMap(t.subtasks, map);
+            });
+            return map;
+        };
+
+        const recalcMutable = (list) => {
+            list.forEach(t => {
+                if(t.subtasks && t.subtasks.length > 0) {
+                    recalcMutable(t.subtasks);
+                    
+                    const starts = t.subtasks.map(s => new Date(s.start).getTime());
+                    const ends = t.subtasks.map(s => new Date(addDays(s.start, s.duration)).getTime());
+                    const minT = Math.min(...starts);
+                    const maxT = Math.max(...ends);
+                    
+                    const curStart = new Date(t.start).getTime();
+                    const curEnd = new Date(addDays(t.start, t.duration)).getTime();
+                    
+                    const newStart = toDateStr(new Date(Math.min(curStart, minT)));
+                    const newEnd = toDateStr(new Date(Math.max(curEnd, maxT)));
+                    
+                    t.start = newStart;
+                    t.duration = diffDays(newStart, newEnd) || 1;
+
+                    let totalWP = 0, totalDur = 0;
+                    t.subtasks.forEach(sub => {
+                         const d = sub.duration > 0 ? sub.duration : 1;
+                         totalWP += (sub.progress || 0) * d;
+                         totalDur += d;
+                    });
+                    t.progress = totalDur > 0 ? Math.round(totalWP / totalDur) : 0;
+                }
+            });
+        };
+
+        const enforceMutable = () => {
+            const flatMap = getFlatMap(tasksClone);
+            let stable = false;
+            let limit = 20;
+            while(!stable && limit > 0) {
+                stable = true;
+                limit--;
+                for(let t of flatMap.values()) {
+                    if(t.dependencies) {
+                        for(let depId of t.dependencies) {
+                            const pred = flatMap.get(depId);
+                            if(pred) {
+                                const predEnd = addDays(pred.start, pred.duration);
+                                if(diffDays(predEnd, t.start) < 0) {
+                                    const shift = diffDays(t.start, predEnd);
+                                    t.start = predEnd;
+                                    const shiftChildren = (node, days) => {
+                                        if(node.subtasks) {
+                                            node.subtasks.forEach(sub => {
+                                                sub.start = addDays(sub.start, days);
+                                                shiftChildren(sub, days);
+                                            });
+                                        }
+                                    };
+                                    shiftChildren(t, shift);
+                                    stable = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        recalcMutable(tasksClone); 
+        enforceMutable(tasksClone); 
+        recalcMutable(tasksClone); 
+        return tasksClone;
+    };
+
+    // --- COMPONENTS ---
+    const Icon = ({ name, className = "" }) => <span className={`material-symbols-outlined select-none ${className}`}>{name}</span>;
+
+    function App() {
+        const [projects, setProjects] = useState(generateInitialProjects());
+        const [activeProjId, setActiveProjId] = useState('slot_1');
+        const [history, setHistory] = useState({ past: [], future: [] }); // History Stack
+        
+        const [viewStart, setViewStart] = useState('2026-01-01');
+        const [viewWeeks, setViewWeeks] = useState(52);
+        const [pxPerWeek, setPxPerWeek] = useState(100);
+        
+        const [tool, setTool] = useState('cursor');
+        const [dragState, setDragState] = useState(null); 
+        const [mousePos, setMousePos] = useState({ x: 0, y: 0 }); 
+        
+        // --- NEW STATE FOR SELECTION & CLIPBOARD ---
+        const [selectedTaskIds, setSelectedTaskIds] = useState(new Set());
+        const [clipboard, setClipboard] = useState([]);
+
+        // --- NEW STATE FOR PANNING & SCROLLING & PERSISTENCE ---
+        const [sidebarWidth, setSidebarWidth] = useState(540);
+        const [resizingSidebar, setResizingSidebar] = useState(false);
+        const [isPanning, setIsPanning] = useState(false);
+        const [lastSaved, setLastSaved] = useState(new Date().toLocaleTimeString());
+        
+        // Refs for DOM elements
+        const panStart = useRef({ x: 0, y: 0, scrollTop: 0, scrollLeft: 0 });
+        const fileInputRef = useRef(null);
+        const tableRef = useRef(null);
+        const chartRef = useRef(null);
+        const activeScroller = useRef(null); 
+        
+        const activeProject = useMemo(() => projects.find(p => p.id === activeProjId) || projects[0], [projects, activeProjId]);
+
+        // --- UNDO / REDO LOGIC ---
+        const saveHistory = useCallback(() => {
+            setHistory(curr => ({
+                past: [...curr.past, JSON.parse(JSON.stringify(projects))],
+                future: []
+            }));
+        }, [projects]);
+
+        const undo = useCallback(() => {
+            if (history.past.length === 0) return;
+            const previous = history.past[history.past.length - 1];
+            const newPast = history.past.slice(0, -1);
+            
+            setHistory(curr => ({
+                past: newPast,
+                future: [JSON.parse(JSON.stringify(projects)), ...curr.future]
+            }));
+            setProjects(previous);
+        }, [history, projects]);
+
+        const redo = useCallback(() => {
+            if (history.future.length === 0) return;
+            const next = history.future[0];
+            const newFuture = history.future.slice(1);
+            
+            setHistory(curr => ({
+                past: [...curr.past, JSON.parse(JSON.stringify(projects))],
+                future: newFuture
+            }));
+            setProjects(next);
+        }, [history, projects]);
+
+        // --- SELECTION & CLIPBOARD LOGIC ---
+        const handleTaskClick = (taskId, e) => {
+            if (e.ctrlKey || e.metaKey) {
+                const newSet = new Set(selectedTaskIds);
+                if (newSet.has(taskId)) newSet.delete(taskId);
+                else newSet.add(taskId);
+                setSelectedTaskIds(newSet);
+            } else {
+                setSelectedTaskIds(new Set([taskId]));
+            }
+        };
+
+        const handleBackgroundClick = (e) => {
+             // If clicking resizing handles or specific controls, ignore
+             if (e.target.closest('.resize-handle') || e.target.closest('.connector-node')) return;
+             // If clicking task, handled by task click
+             if (e.target.closest('.task-group')) return;
+             // If clicking row, ignore (let it select?) - actually let's clear if clicking empty space
+             setSelectedTaskIds(new Set());
+        };
+
+        const copyTasks = useCallback(() => {
+            const allFlat = flattenAllTasks(activeProject.tasks);
+            const selected = allFlat.filter(t => selectedTaskIds.has(t.id));
+            if (selected.length > 0) {
+                // Deep copy to clipboard
+                setClipboard(JSON.parse(JSON.stringify(selected)));
+                console.log("Copied", selected.length, "tasks");
+            }
+        }, [selectedTaskIds, activeProject]);
+
+        const pasteTasks = useCallback(() => {
+            if (clipboard.length === 0) return;
+            saveHistory();
+
+            const clipboardMap = new Map();
+            clipboard.forEach(t => clipboardMap.set(t.id, t));
+
+            // SMART PASTE LOGIC: Find positions and insert below original
+            const insertSmart = (taskList) => {
+                let newList = [];
+                taskList.forEach(task => {
+                    newList.push(task); // Add original
+                    // Recursive for subtasks
+                    if (task.subtasks) {
+                        task.subtasks = insertSmart(task.subtasks);
+                    }
+                    
+                    // Check if this task is in clipboard (was copied)
+                    if (clipboardMap.has(task.id)) {
+                        const source = clipboardMap.get(task.id);
+                        const newId = 't' + Date.now() + Math.random().toString(36).substr(2, 5);
+                        
+                        // Calculate new start (sequential)
+                        let newStart = task.start;
+                        try {
+                           newStart = addDays(task.start, task.duration);
+                        } catch(e) {}
+
+                        const newTask = {
+                            ...source,
+                            id: newId,
+                            name: source.name + " (Copy)",
+                            start: newStart,
+                            // If copied item had subtasks, clear them to avoid ID conflict for simple implementation
+                            // Or keep them but deep re-ID required. For robustness v1, clearing subtasks on copy
+                            subtasks: [] 
+                        };
+                        newList.push(newTask); // Insert copy immediately after
+                    }
+                });
+                return newList;
+            };
+
+            // If we didn't find any originals (e.g. they were deleted), append to end
+            // But first try smart insert
+            let newProjectTasks = insertSmart(JSON.parse(JSON.stringify(activeProject.tasks)));
+            
+            // Let's check if any clipboard item was NOT in activeProject originally
+            const flatActive = flattenAllTasks(activeProject.tasks);
+            const activeIds = new Set(flatActive.map(t => t.id));
+            
+            const orphans = clipboard.filter(c => !activeIds.has(c.id));
+            
+            if (orphans.length > 0) {
+                 orphans.forEach(t => {
+                     const newId = 't' + Date.now() + Math.random().toString(36).substr(2, 5);
+                     newProjectTasks.push({
+                         ...t,
+                         id: newId,
+                         name: t.name + " (Copy)",
+                         start: addDays(t.start, 1), // Default slight shift
+                         subtasks: []
+                     });
+                 });
+            }
+
+            updateProject(p => ({
+                ...p,
+                tasks: applyPipeline(newProjectTasks)
+            }));
+        }, [clipboard, saveHistory, activeProject]);
+
+        const deleteSelectedTasks = useCallback(() => {
+            if (selectedTaskIds.size === 0) return;
+            if(!confirm(`Delete ${selectedTaskIds.size} tasks?`)) return;
+            
+            saveHistory();
+            updateProject(p => {
+                const deleteRecursive = (list) => list.filter(t => !selectedTaskIds.has(t.id)).map(t => ({
+                    ...t,
+                    subtasks: t.subtasks ? deleteRecursive(t.subtasks) : []
+                }));
+                return { ...p, tasks: applyPipeline(deleteRecursive(p.tasks)) };
+            });
+            setSelectedTaskIds(new Set());
+        }, [selectedTaskIds, saveHistory]);
+
+
+        // Keyboard Shortcuts
+        useEffect(() => {
+            const handleKeyDown = (e) => {
+                const isCtrl = e.ctrlKey || e.metaKey;
+                
+                // Undo / Redo
+                if (isCtrl && (e.key === 'z' || e.key === 'Z')) {
+                    e.preventDefault();
+                    if (e.shiftKey) redo();
+                    else undo();
+                }
+                if (isCtrl && (e.key === 'y' || e.key === 'Y') && !e.shiftKey) {
+                    e.preventDefault();
+                    redo();
+                }
+
+                // Copy / Paste - Guard for inputs
+                if (isCtrl && (e.key === 'c' || e.key === 'C')) {
+                    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                    // e.preventDefault(); 
+                    copyTasks();
+                }
+                if (isCtrl && (e.key === 'v' || e.key === 'V')) {
+                    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                    // e.preventDefault(); 
+                    pasteTasks();
+                }
+
+                // Delete
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                     // Check if not in input
+                     if (document.activeElement.tagName !== 'INPUT') {
+                         deleteSelectedTasks();
+                     }
+                }
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }, [undo, redo, copyTasks, pasteTasks, deleteSelectedTasks]);
+
+        // NEW: Calculate Today X
+        const todayX = useMemo(() => {
+            const today = new Date();
+            const start = new Date(viewStart);
+            const diffTime = today.getTime() - start.getTime();
+            const days = diffTime / (1000 * 3600 * 24);
+            return (days / 7) * pxPerWeek;
+        }, [viewStart, pxPerWeek]);
+
+        const visibleTasks = useMemo(() => {
+            const result = [];
+            const traverse = (taskList, level) => {
+                taskList.forEach(t => {
+                    result.push({ ...t, level });
+                    if (t.expanded && t.subtasks && t.subtasks.length > 0) {
+                        traverse(t.subtasks, level + 1);
+                    }
+                });
+            };
+            if(activeProject) traverse(activeProject.tasks, 0);
+            return result;
+        }, [activeProject]);
+
+        const allTasksFlat = useMemo(() => {
+            return activeProject ? flattenAllTasks(activeProject.tasks) : [];
+        }, [activeProject]);
+
+        const totalContentHeight = useMemo(() => {
+            return Math.max(((visibleTasks.length || 0) * ROW_HEIGHT) + 200, 600);
+        }, [visibleTasks.length]);
+
+        // --- CALENDAR RENDER ---
+        const calendarData = useMemo(() => {
+            const weeks = [];
+            const months = [];
+            const quarters = [];
+            const years = [];
+            let currentDate = new Date(viewStart);
+            for(let i = 0; i < viewWeeks; i++) {
+                const year = currentDate.getFullYear();
+                const monthName = currentDate.toLocaleDateString('en-US', { month: 'short' });
+                const q = `Q${Math.floor(currentDate.getMonth() / 3) + 1}`;
+                const wNum = getWeekNum(currentDate);
+                const wLabel = `W${wNum}`;
+                const wSubLabel = formatWeekRange(currentDate);
+                weeks.push({ label: wLabel, subLabel: wSubLabel, index: i });
+                const lastM = months[months.length-1];
+                if(lastM && lastM.label === monthName && lastM.year === year) lastM.span++;
+                else months.push({ label: monthName, year, span: 1, startIdx: i });
+                const lastQ = quarters[quarters.length-1];
+                if(lastQ && lastQ.label === q && lastQ.year === year) lastQ.span++;
+                else quarters.push({ label: q, year, span: 1, startIdx: i });
+                const lastY = years[years.length-1];
+                if(lastY && lastY.label === year) lastY.span++;
+                else years.push({ label: year, span: 1, startIdx: i });
+                currentDate.setDate(currentDate.getDate() + 7);
+            }
+            return { weeks, months, quarters, years };
+        }, [viewStart, viewWeeks]);
+
+        // Persistence Logic
+        useEffect(() => {
+            const saved = localStorage.getItem('progantt_v16_final');
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if(Array.isArray(parsed)) {
+                        setProjects(parsed);
+                        return; 
+                    }
+                } catch(e) { console.error("LS Error", e); }
+            }
+            if (window.__PRELOADED_STATE__) {
+                try {
+                    const preloaded = JSON.parse(window.__PRELOADED_STATE__);
+                    setProjects(preloaded);
+                    return; 
+                } catch(e) { console.error("Preload Error", e); }
+            }
+            setProjects(prev => prev.map(prj => ({ ...prj, tasks: applyPipeline(prj.tasks) })));
+        }, []);
+
+        useEffect(() => {
+            localStorage.setItem('progantt_v16_final', JSON.stringify(projects));
+            setLastSaved(new Date().toLocaleTimeString());
+        }, [projects]);
+
+        // --- HANDLERS ---
+        const getCleanHTML = (injectData = false) => {
+            const clone = document.documentElement.cloneNode(true);
+            const rootDiv = clone.querySelector('#root');
+            if(rootDiv) {
+                rootDiv.innerHTML = "";
+                rootDiv.removeAttribute('data-reactroot');
+            }
+            
+            // Remove injected env scripts
+            const scripts = clone.querySelectorAll('script');
+            scripts.forEach(s => {
+                if (!s.hasAttribute('src') && s.getAttribute('type') !== 'text/babel' && !s.hasAttribute('data-injected')) {
+                    s.remove();
+                }
+            });
+
+            let html = "<!DOCTYPE html>\n" + clone.outerHTML;
+
+            if (injectData) {
+                const safeJson = JSON.stringify(JSON.stringify(projects)).replace(/<\/script>/g, '<\\\\/script>');
+                const injectionScript = `<script data-injected="true">window.__PRELOADED_STATE__ = ${safeJson};` + '<' + '/script>';
+                html = html.replace('</head>', `${injectionScript}</head>`);
+            }
+            
+            return html;
+        };
+
+        const downloadAsHTML = () => {
+            const htmlContent = getCleanHTML(true); 
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ProGantt_Local.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+        
+        const downloadSourceCode = () => {
+            const htmlContent = getCleanHTML(false); 
+            const blob = new Blob([htmlContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ProGantt_Source.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        const handleExport = () => {
+            const dataStr = JSON.stringify(projects, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const now = new Date();
+            const datePart = now.toISOString().slice(0,10);
+            const timePart = now.getHours().toString().padStart(2,'0') + "-" + now.getMinutes().toString().padStart(2,'0');
+            a.download = `ProGantt_Data_${datePart}_${timePart}.json`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        const handleImport = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if (Array.isArray(imported)) {
+                        saveHistory(); // Save before importing
+                        const recalced = imported.map(prj => ({ ...prj, tasks: applyPipeline(prj.tasks) }));
+                        setProjects(recalced);
+                        alert("Import Successful!");
+                    }
+                } catch (err) { alert("Import Failed"); }
+            };
+            reader.readAsText(file);
+            e.target.value = null;
+        };
+
+        const handleExcelExport = () => {
+            exportToExcel(projects, viewStart, viewWeeks);
+        };
+
+        const updateProject = (fn) => setProjects(prev => prev.map(p => p.id === activeProjId ? fn(p) : p));
+        const updateProjectMeta = (id, updates) => setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+
+        // DRAG & DROP FOR TABS
+        const handleTabDragStart = (e, index) => {
+            e.dataTransfer.setData('tabIndex', index);
+            e.dataTransfer.effectAllowed = 'move';
+        };
+
+        const handleTabDragOver = (e) => {
+            e.preventDefault(); // Necessary to allow dropping
+        };
+
+        const handleTabDrop = (e, targetIndex) => {
+            e.preventDefault();
+            const sourceIndex = parseInt(e.dataTransfer.getData('tabIndex'));
+            if (sourceIndex === targetIndex || isNaN(sourceIndex)) return;
+
+            saveHistory(); // Save before reordering tabs
+
+            const newProjects = [...projects];
+            const [movedProject] = newProjects.splice(sourceIndex, 1);
+            newProjects.splice(targetIndex, 0, movedProject);
+            setProjects(newProjects);
+        };
+
+        // Sync Logic
+        const handleMouseEnterTable = () => { activeScroller.current = 'table'; };
+        const handleMouseEnterChart = () => { activeScroller.current = 'chart'; };
+
+        const handleScrollTable = (e) => {
+            if (activeScroller.current === 'table' && chartRef.current) {
+                chartRef.current.scrollTop = e.target.scrollTop;
+            }
+        };
+
+        const handleScrollChart = (e) => {
+            if (activeScroller.current === 'chart' && tableRef.current) {
+                tableRef.current.scrollTop = e.target.scrollTop;
+            }
+        };
+
+        // --- CHART PANNING LOGIC ---
+        const handleChartMouseDown = (e) => {
+            if (e.target.closest('.task-group')) return;
+
+            // 2. Ignore if clicking scrollbars (Fixed Logic)
+            if (chartRef.current) {
+                const rect = chartRef.current.getBoundingClientRect();
+                const scrollbarWidth = chartRef.current.offsetWidth - chartRef.current.clientWidth;
+                const scrollbarHeight = chartRef.current.offsetHeight - chartRef.current.clientHeight;
+                
+                if (scrollbarWidth > 0 && e.clientX >= rect.left + chartRef.current.offsetWidth - scrollbarWidth) {
+                    return; 
+                }
+                
+                if (scrollbarHeight > 0 && e.clientY >= rect.top + chartRef.current.offsetHeight - scrollbarHeight) {
+                    return; 
+                }
+            }
+            
+            // Clear selection on chart background click if not dragging handle
+            if (!e.target.closest('.resize-handle') && !e.target.closest('.connector-node')) {
+                setSelectedTaskIds(new Set());
+            }
+
+            setIsPanning(true);
+            activeScroller.current = 'chart'; 
+            panStart.current = {
+                x: e.clientX,
+                y: e.clientY,
+                scrollTop: chartRef.current.scrollTop,
+                scrollLeft: chartRef.current.scrollLeft
+            };
+        };
+        
+        const handleChartWheel = (e) => {
+            if (activeScroller.current === 'chart' && !e.shiftKey) {
+                if (tableRef.current) {
+                    tableRef.current.scrollTop = e.currentTarget.scrollTop;
+                }
+            }
+        };
+
+        const moveTaskInTreeStructure = (tasks, draggedId, targetId) => {
+            let draggedTask = null;
+            const removeRecursive = (list) => {
+                const idx = list.findIndex(t => t.id === draggedId);
+                if (idx !== -1) {
+                    draggedTask = list[idx];
+                    list.splice(idx, 1);
+                    return true;
+                }
+                for (let t of list) {
+                    if (t.subtasks && removeRecursive(t.subtasks)) return true;
+                }
+                return false;
+            };
+            const newTasks = JSON.parse(JSON.stringify(tasks));
+            if (!removeRecursive(newTasks)) return tasks; 
+            const insertRecursive = (list) => {
+                const idx = list.findIndex(t => t.id === targetId);
+                if (idx !== -1) {
+                    list.splice(idx + 1, 0, draggedTask);
+                    return true;
+                }
+                for (let t of list) {
+                    if (t.subtasks && insertRecursive(t.subtasks)) return true;
+                }
+                return false;
+            };
+            if (!insertRecursive(newTasks)) {
+                newTasks.push(draggedTask);
+            }
+            return newTasks;
+        };
+
+        const handleTaskReorder = (draggedId, targetId) => {
+            if (draggedId === targetId) return;
+            saveHistory(); // Save before reorder
+            updateProject(p => ({
+                ...p,
+                tasks: applyPipeline(moveTaskInTreeStructure(p.tasks, draggedId, targetId))
+            }));
+        };
+
+        const getMinStartDateForTask = (taskId, allTasks) => {
+            let minDateStr = '1900-01-01';
+            const flat = flattenAllTasks(allTasks);
+            const task = flat.find(t => t.id === taskId);
+            if (task && task.dependencies) {
+                task.dependencies.forEach(depId => {
+                    const pred = flat.find(p => p.id === depId);
+                    if (pred) {
+                        const predEnd = addDays(pred.start, pred.duration);
+                        if (diffDays(minDateStr, predEnd) > 0) minDateStr = predEnd;
+                    }
+                });
+            }
+            let currParent = findParentOfTask(allTasks, taskId);
+            while(currParent) {
+                if(currParent.dependencies) {
+                     currParent.dependencies.forEach(depId => {
+                        const pred = flat.find(p => p.id === depId);
+                        if(pred) {
+                             const predEnd = addDays(pred.start, pred.duration);
+                             if (diffDays(minDateStr, predEnd) > 0) minDateStr = predEnd;
+                        }
+                     });
+                }
+                currParent = findParentOfTask(allTasks, currParent.id);
+            }
+            return minDateStr;
+        };
+
+        const updateTask = (taskId, updater) => {
+            updateProject(p => {
+                const updateRecursive = (list) => list.map(t => {
+                    if(t.id === taskId) return typeof updater === 'function' ? updater(t) : {...t, ...updater};
+                    if(t.subtasks) return {...t, subtasks: updateRecursive(t.subtasks)};
+                    return t;
+                });
+                return { ...p, tasks: applyPipeline(updateRecursive(p.tasks)) };
+            });
+        };
+
+        const addProject = () => {
+            saveHistory(); // Save before add
+            const newId = 'p' + Date.now();
+            const colors = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#eab308'];
+            setProjects(prev => [...prev, { 
+                id: newId, 
+                name: `Project ${prev.length+1}`, 
+                color: colors[prev.length%colors.length], 
+                tasks: [] 
+            }]);
+            setActiveProjId(newId);
+        };
+
+        const removeProject = (id, e) => {
+            e.stopPropagation();
+            if(projects.length <= 1) return;
+            if(confirm("Delete project?")) {
+                saveHistory(); // Save before remove
+                const rem = projects.filter(p => p.id !== id);
+                setProjects(rem);
+                if(activeProjId === id) setActiveProjId(rem[0].id);
+            }
+        };
+
+        const deleteTask = (id) => {
+            if(!confirm("Delete task?")) return;
+            saveHistory(); // Save before delete
+            updateProject(p => {
+                const deleteRecursive = (list) => list.filter(t => t.id !== id).map(t => ({
+                    ...t,
+                    subtasks: t.subtasks ? deleteRecursive(t.subtasks) : []
+                }));
+                return { ...p, tasks: applyPipeline(deleteRecursive(p.tasks)) };
+            });
+        };
+
+        const addSubTask = (parentId) => {
+            saveHistory(); // Save before add subtask
+            const parent = findTaskById(activeProject.tasks, parentId);
+            const newStart = parent ? parent.start : viewStart;
+            const defaultCat = parent ? parent.category : 'software';
+            updateTask(parentId, t => ({
+                ...t,
+                expanded: true,
+                subtasks: [...(t.subtasks || []), {
+                    id: 'st' + Date.now(),
+                    name: 'New Subtask',
+                    start: newStart,
+                    duration: 5,
+                    progress: 0,
+                    category: defaultCat,
+                    dependencies: [],
+                    subtasks: []
+                }]
+            }));
+        };
+
+        const addTask = () => {
+            saveHistory(); // Save before add task
+            updateProject(p => ({
+                ...p,
+                tasks: applyPipeline([...p.tasks, {
+                    id: 't' + Date.now(),
+                    name: 'New Main Task',
+                    start: viewStart,
+                    duration: 7,
+                    progress: 0,
+                    category: 'software',
+                    expanded: true,
+                    dependencies: [],
+                    subtasks: []
+                }])
+            }));
+        };
+
+        const toggleExpand = (taskId) => {
+            updateTask(taskId, t => ({ ...t, expanded: !t.expanded }));
+        };
+
+        const deleteDependency = (childId, parentId) => {
+            if(!confirm("Remove dependency?")) return;
+            saveHistory(); // Save before delete dep
+            updateTask(childId, t => ({...t, dependencies: t.dependencies.filter(d => d !== parentId)}));
+        };
+
+        // Global mouse handlers
+        useEffect(() => {
+            const handleMouseMove = (e) => {
+                // 1. Resizing Sidebar
+                if (resizingSidebar) {
+                    e.preventDefault();
+                    const newWidth = Math.max(300, Math.min(e.clientX, 800));
+                    setSidebarWidth(newWidth);
+                    return;
+                }
+
+                // 2. Panning Chart
+                if (isPanning && chartRef.current) {
+                    e.preventDefault();
+                    const dx = e.clientX - panStart.current.x;
+                    const dy = e.clientY - panStart.current.y;
+                    
+                    chartRef.current.scrollTop = panStart.current.scrollTop - dy;
+                    chartRef.current.scrollLeft = panStart.current.scrollLeft - dx;
+                    
+                    if(tableRef.current) {
+                        tableRef.current.scrollTop = chartRef.current.scrollTop;
+                    }
+                    return;
+                }
+
+                const svgRect = document.getElementById('gantt-svg')?.getBoundingClientRect();
+                if(svgRect) setMousePos({ x: e.clientX - svgRect.left, y: e.clientY - svgRect.top });
+
+                // 3. Task Dragging
+                if (!dragState) return;
+                const { type, startX, initialStart, initialDur, taskId } = dragState;
+                const diffPx = e.clientX - startX;
+                const diffDaysCount = Math.round((diffPx / pxPerWeek) * 7);
+
+                if (type === 'MOVE') {
+                    const minStart = getMinStartDateForTask(taskId, activeProject.tasks);
+                    let targetStart = addDays(initialStart, diffDaysCount);
+                    if (diffDays(minStart, targetStart) < 0) targetStart = minStart;
+
+                    updateProject(p => {
+                        const currentTask = findTaskById(p.tasks, taskId);
+                        if (!currentTask) return p;
+                        
+                        const currentStart = currentTask.start;
+                        const dayDelta = diffDays(currentStart, targetStart);
+                        
+                        if (dayDelta !== 0) {
+                            const applyShiftRecursive = (list) => list.map(t => {
+                                if(t.id === taskId) {
+                                    const shiftNode = (n) => ({
+                                        ...n,
+                                        start: addDays(n.start, dayDelta),
+                                        subtasks: n.subtasks ? n.subtasks.map(shiftNode) : []
+                                    });
+                                    return shiftNode(t);
+                                }
+                                if(t.subtasks) return {...t, subtasks: applyShiftRecursive(t.subtasks)};
+                                return t;
+                            });
+                            return { ...p, tasks: applyPipeline(applyShiftRecursive(p.tasks)) };
+                        }
+                        return p;
+                    });
+                } 
+                else if (type === 'RESIZE_R') {
+                    const newDur = Math.max(1, initialDur + diffDaysCount);
+                    updateTask(taskId, { duration: newDur });
+                }
+                else if (type === 'RESIZE_L') {
+                    const minStart = getMinStartDateForTask(taskId, activeProject.tasks);
+                    let newStart = addDays(initialStart, diffDaysCount);
+                    if (diffDays(minStart, newStart) < 0) newStart = minStart;
+                    
+                    const oldEnd = addDays(initialStart, initialDur);
+                    let newDur = diffDays(newStart, oldEnd);
+                    if (newDur < 1) { newDur = 1; newStart = addDays(oldEnd, -1); }
+                    updateTask(taskId, { start: newStart, duration: newDur });
+                }
+                
+                // Auto-Scroll Logic during Drag
+                 if (tableRef.current) {
+                    const container = tableRef.current;
+                    const rect = container.getBoundingClientRect();
+                    const y = e.clientY;
+                    const threshold = 50; 
+                    const speed = 15; 
+
+                    if (y < rect.top + threshold) {
+                        container.scrollTop -= speed;
+                        if(chartRef.current) chartRef.current.scrollTop = container.scrollTop;
+                    } else if (y > rect.bottom - threshold) {
+                        container.scrollTop += speed;
+                        if(chartRef.current) chartRef.current.scrollTop = container.scrollTop;
+                    }
+                }
+            };
+
+            const handleMouseUp = () => {
+                if (resizingSidebar) {
+                    setResizingSidebar(false);
+                    return;
+                }
+                if (isPanning) {
+                    setIsPanning(false);
+                    return;
+                }
+
+                if(dragState?.type === 'CONNECT' && dragState.targetId && dragState.sourceId !== dragState.targetId) {
+                    const target = findTaskById(activeProject.tasks, dragState.targetId);
+                    if(target && !target.dependencies?.includes(dragState.sourceId)) {
+                        updateTask(dragState.targetId, t => ({...t, dependencies: [...(t.dependencies||[]), dragState.sourceId]}));
+                    }
+                }
+                setDragState(null);
+            };
+
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('mouseleave', handleMouseUp);
+            
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('mouseup', handleMouseUp);
+                window.removeEventListener('mouseleave', handleMouseUp);
+            };
+        }, [dragState, pxPerWeek, activeProject, resizingSidebar, isPanning]);
+
+        return (
+            <div className={`flex flex-col h-full ${tool === 'eraser' ? 'cursor-eraser' : ''} ${resizingSidebar ? 'cursor-col-resize select-none' : ''} relative`}>
+                
+                {/* TOOLBAR */}
+                <div className="bg-white border-b border-slate-200 shadow-sm z-30 shrink-0 px-4 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
+                            <Icon name="account_tree" className="text-indigo-600"/>
+                            <span>ProGantt v18.3</span>
+                        </div>
+                        <div className="h-6 w-px bg-slate-200"></div>
+                        <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
+                            <button onClick={() => setTool('cursor')} className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${tool === 'cursor' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}><Icon name="pan_tool_alt" className="text-[18px]"/> Edit</button>
+                            <button onClick={() => setTool('eraser')} className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-colors ${tool === 'eraser' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}><Icon name="ink_eraser" className="text-[18px]"/> Delete</button>
+                        </div>
+                        
+                        <div className="h-6 w-px bg-slate-200"></div>
+                        <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
+                             <button onClick={undo} disabled={history.past.length === 0} title="Undo (Ctrl+Z)" className={`px-2 py-1.5 rounded flex items-center justify-center transition-colors ${history.past.length === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm'}`}><Icon name="undo" className="text-[20px]"/></button>
+                             <button onClick={redo} disabled={history.future.length === 0} title="Redo (Ctrl+Shift+Z)" className={`px-2 py-1.5 rounded flex items-center justify-center transition-colors ${history.future.length === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm'}`}><Icon name="redo" className="text-[20px]"/></button>
+                        </div>
+                        
+                        <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
+                            <button onClick={copyTasks} disabled={selectedTaskIds.size === 0} title="Copy Selected (Ctrl+C)" className={`px-2 py-1.5 rounded flex items-center justify-center transition-colors ${selectedTaskIds.size === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm'}`}><Icon name="content_copy" className="text-[18px]"/></button>
+                            <button onClick={pasteTasks} disabled={clipboard.length === 0} title="Paste (Ctrl+V)" className={`px-2 py-1.5 rounded flex items-center justify-center transition-colors ${clipboard.length === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm'}`}><Icon name="content_paste" className="text-[18px]"/></button>
+                            <button onClick={deleteSelectedTasks} disabled={selectedTaskIds.size === 0} title="Delete Selected (Del)" className={`px-2 py-1.5 rounded flex items-center justify-center transition-colors ${selectedTaskIds.size === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-white hover:text-red-500 hover:shadow-sm'}`}><Icon name="delete_sweep" className="text-[20px]"/></button>
+                        </div>
+
+                        <div className="h-6 w-px bg-slate-200"></div>
+                        <button onClick={downloadSourceCode} className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-indigo-600 px-2 py-1 rounded transition-colors bg-slate-50 border border-slate-200">
+                            <Icon name="code" className="text-[18px]"/> Code
+                        </button>
+                        <button onClick={downloadAsHTML} className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-emerald-600 px-2 py-1 rounded transition-colors bg-emerald-50 border border-emerald-200">
+                            <Icon name="download" className="text-[18px]"/> App
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
+                            <Icon name="save" className="text-slate-400 text-[16px]"/>
+                            <span className="text-[10px] text-slate-500 font-mono">Saved: {lastSaved}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 bg-slate-50 p-1 rounded border border-slate-200">
+                            <label className="text-xs font-bold text-slate-400 uppercase px-1">Start:</label>
+                            <input type="date" value={viewStart} onChange={(e) => setViewStart(e.target.value)} className="text-sm bg-transparent border-none focus:ring-0 w-28 outline-none"/>
+                            <div className="w-px h-4 bg-slate-300"></div>
+                            <label className="text-xs font-bold text-slate-400 uppercase px-1">Weeks:</label>
+                            <input type="number" min="4" max="156" value={viewWeeks} onChange={(e) => setViewWeeks(parseInt(e.target.value))} className="text-sm bg-transparent border-none focus:ring-0 w-12 outline-none"/>
+                            <div className="w-px h-4 bg-slate-300"></div>
+                            <label className="text-xs font-bold text-slate-400 uppercase px-1">Zoom:</label>
+                            <input type="range" min="30" max="150" value={pxPerWeek} onChange={(e) => setPxPerWeek(Number(e.target.value))} className="w-20 accent-indigo-600"/>
+                        </div>
+
+                        <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={handleImport} />
+                        <button onClick={() => fileInputRef.current.click()} title="Import Data" className="p-2 hover:bg-slate-100 rounded-full text-slate-600"><Icon name="upload"/></button>
+                        <button onClick={handleExport} title="Export JSON" className="p-2 hover:bg-slate-100 rounded-full text-slate-600"><Icon name="download"/></button>
+                        <button onClick={handleExcelExport} className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-green-600 px-2 py-1 rounded transition-colors bg-green-50 border border-green-200">
+                            <Icon name="table_view" className="text-[18px]"/> Excel
+                        </button>
+                    </div>
+                </div>
+
+                {/* PROJECT TABS - WITH DRAG AND DROP */}
+                <div className="flex items-end px-4 gap-2 bg-slate-50 border-b border-slate-200 overflow-x-auto pt-2 pb-0">
+                    {projects.map((p, index) => (
+                        <div 
+                            key={p.id} 
+                            draggable="true"
+                            onDragStart={(e) => handleTabDragStart(e, index)}
+                            onDragOver={handleTabDragOver}
+                            onDrop={(e) => handleTabDrop(e, index)}
+                            className={`group relative px-3 py-2 min-w-[160px] rounded-t-lg border-t border-l border-r select-none flex items-center justify-between text-sm transition-all cursor-move ${activeProjId === p.id ? 'bg-white border-slate-300 border-b-white -mb-[1px] shadow-sm z-10' : 'bg-slate-100 border-transparent text-slate-500 hover:bg-slate-200 border-b-slate-200 opacity-80 hover:opacity-100'}`}
+                            title="Drag to reorder"
+                        >
+                            <div className="flex items-center gap-2 w-full cursor-pointer" onClick={(e) => { 
+                                // Prevent tab switch when interacting with inputs
+                                if(e.target.tagName !== 'INPUT') setActiveProjId(p.id) 
+                            }}>
+                                <input type="color" value={p.color} onChange={(e) => { saveHistory(); updateProjectMeta(p.id, { color: e.target.value }); }} onClick={(e) => {e.stopPropagation(); setActiveProjId(p.id);}} />
+                                <input value={p.name} onFocus={saveHistory} onChange={(e) => updateProjectMeta(p.id, { name: e.target.value })} onClick={(e) => {e.stopPropagation(); setActiveProjId(p.id);}} className={`bg-transparent w-full focus:outline-none font-medium text-xs truncate ${activeProjId === p.id ? 'text-slate-800' : 'text-slate-500'}`}/>
+                            </div>
+                            <button onClick={(e) => removeProject(p.id, e)} className="opacity-0 group-hover:opacity-100 hover:text-red-500 ml-1"><Icon name="close" className="text-[14px]"/></button>
+                            {activeProjId === p.id && <div className="absolute top-0 left-0 w-full h-1 rounded-t-lg" style={{background: p.color}}></div>}
+                        </div>
+                    ))}
+                    <button onClick={addProject} className="p-1 mb-1 hover:bg-slate-200 rounded text-slate-500 flex items-center gap-1 text-xs font-semibold px-2"><Icon name="add" className="text-[18px]"/> Add Slot</button>
+                </div>
+
+                {/* MAIN CONTENT */}
+                <div className="flex flex-1 overflow-hidden relative">
+                    
+                    {/* LEFT SIDEBAR */}
+                    <div 
+                        ref={tableRef}
+                        onMouseEnter={handleMouseEnterTable}
+                        onScroll={handleScrollTable}
+                        className="bg-white border-r border-slate-200 flex flex-col shadow-lg z-20 shrink-0 overflow-y-auto custom-scrollbar" 
+                        style={{ width: sidebarWidth }}
+                    >
+                        <div className="h-[100px] bg-slate-50 border-b border-slate-200 flex items-center px-2 text-[10px] font-bold text-slate-500 uppercase sticky top-0 z-50 shrink-0">
+                            <div className="w-8 text-center">#</div>
+                            <div className="flex-1 px-2 pl-4">Task Hierarchy</div>
+                            <div className="w-32 px-1">Category</div>
+                            <div className="w-20 px-2 text-center">Prog</div>
+                            <div className="w-10 text-center">Days</div>
+                            <div className="w-14"></div>
+                        </div>
+                        
+                        <div className="relative" style={{ minHeight: totalContentHeight }}>
+                            <div className="absolute top-0 left-0 w-full">
+                                {visibleTasks.map((task, idx) => {
+                                    const catKey = task.category || 'software';
+                                    const catData = CATEGORIES[catKey] || CATEGORIES.software;
+                                    const isParent = task.subtasks && task.subtasks.length > 0;
+                                    const isSelected = selectedTaskIds.has(task.id);
+                                    
+                                    return (
+                                        <div 
+                                            key={task.id} 
+                                            className={`flex items-center gap-1 px-1 border-b border-slate-100 hover:bg-slate-50 group h-[${ROW_HEIGHT}px] ${isSelected ? 'selected-row' : ''}`}
+                                            onClick={(e) => handleTaskClick(task.id, e)}
+                                            onDragOver={(e) => e.preventDefault()}
+                                            onDrop={(e) => { 
+                                                e.stopPropagation();
+                                                const draggedId = e.dataTransfer.getData('taskId');
+                                                if (draggedId) handleTaskReorder(draggedId, task.id);
+                                            }}
+                                        >
+                                            <div 
+                                                className="w-8 h-full flex items-center justify-center cursor-grab text-slate-300 hover:text-slate-500"
+                                                draggable="true"
+                                                onDragStart={(e) => e.dataTransfer.setData('taskId', task.id)}
+                                            >
+                                                <Icon name="drag_indicator" className="text-[16px]"/>
+                                            </div>
+                                            
+                                            <div className="flex-1 flex items-center min-w-0 pr-1 relative">
+                                                <div style={{ width: task.level * 24 + 'px' }} className="shrink-0"></div>
+                                                <button onClick={(e) => { e.stopPropagation(); toggleExpand(task.id); }} className={`w-6 h-6 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 mr-1 ${!task.subtasks ? 'invisible' : ''}`}>
+                                                    <Icon name={task.expanded ? "keyboard_arrow_down" : "keyboard_arrow_right"} className="text-[18px]"/>
+                                                </button>
+                                                <input value={task.name} onFocus={saveHistory} onChange={(e) => updateTask(task.id, { name: e.target.value })}
+                                                    className={`flex-1 min-w-0 bg-transparent text-sm rounded px-1 focus:bg-white focus:ring-1 focus:ring-indigo-500 border border-transparent focus:border-indigo-500 h-8 ${task.level===0 ? 'font-bold text-slate-800' : 'font-medium text-slate-600'}`} 
+                                                    onMouseDown={(e) => e.stopPropagation()} /* Prevents triggering row selection when clicking input */
+                                                />
+                                            </div>
+
+                                            <div className="w-32 px-1">
+                                                <select value={catKey} onClick={(e) => { e.stopPropagation(); saveHistory(); }} onChange={(e) => updateTask(task.id, { category: e.target.value })}
+                                                    className={`w-full text-[10px] h-6 rounded px-2 border-none focus:ring-0 cursor-pointer font-semibold ${catData.bg} pr-4`}>
+                                                    {Object.entries(CATEGORIES).map(([key, val]) => (<option key={key} value={key}>{val.label}</option>))}
+                                                </select>
+                                            </div>
+                                            <div className="w-20 px-1 flex flex-col items-center justify-center">
+                                                <div className="flex justify-between w-full text-[9px] text-slate-400 mb-0.5"><span>{task.progress || 0}%</span></div>
+                                                <input 
+                                                    type="range" 
+                                                    min="0" 
+                                                    max="100" 
+                                                    value={task.progress || 0} 
+                                                    disabled={isParent} 
+                                                    onMouseDown={(e) => { e.stopPropagation(); saveHistory(); }}
+                                                    onChange={(e) => updateTask(task.id, { progress: parseInt(e.target.value) })}
+                                                    className={`w-full h-1 bg-slate-200 rounded-lg appearance-none ${isParent ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`} 
+                                                    draggable="false" 
+                                                />
+                                            </div>
+                                            <div className="w-10 text-center text-xs text-slate-500 font-mono">{task.duration}</div>
+                                            
+                                            <div className="w-14 flex items-center justify-end gap-1">
+                                                <button onClick={(e) => { e.stopPropagation(); addSubTask(task.id); }} title="Add Subtask" className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"><Icon name="playlist_add" className="text-[16px]"/></button>
+                                                <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} title="Delete" className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"><Icon name="delete" className="text-[16px]"/></button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {!activeProject && <div className="p-4 text-center text-slate-400">No active project</div>}
+                                {activeProject && <button onClick={addTask} className="w-full py-2 border border-dashed border-slate-300 rounded text-slate-500 text-sm hover:border-indigo-500 hover:text-indigo-600 flex items-center justify-center gap-2 mt-2"><Icon name="add_circle"/> New Main Task</button>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RESIZER */}
+                    <div 
+                        className="w-1 bg-slate-200 hover:bg-slate-300 cursor-col-resize z-30 transition-colors shrink-0"
+                        onMouseDown={() => setResizingSidebar(true)}
+                    ></div>
+
+                    {/* CHART (Block Model Fix) */}
+                    <div 
+                        ref={chartRef}
+                        onMouseEnter={handleMouseEnterChart}
+                        onScroll={handleScrollChart}
+                        onMouseDown={handleChartMouseDown}
+                        onWheel={handleChartWheel}
+                        onDragStart={(e) => e.preventDefault()} 
+                        className="flex-1 force-vertical-scroll bg-white relative custom-scrollbar h-full block" 
+                        style={{ cursor: isPanning ? 'grabbing' : 'default' }}
+                    >
+                        <div className="sticky top-0 z-50 bg-white border-b border-slate-200 flex flex-col min-w-max shadow-sm shrink-0 min-h-[100px]">
+                            {/* Calendar Headers - CENTERED */}
+                            <div className="flex h-5 border-b border-slate-100">
+                                {calendarData.years.map((y, i) => (<div key={i} style={{width: y.span * pxPerWeek}} className="border-r border-slate-200 px-2 text-[10px] font-bold bg-slate-100 flex items-center justify-center text-slate-700">{y.label}</div>))}
+                            </div>
+                            <div className="flex h-5 border-b border-slate-100">
+                                {calendarData.quarters.map((q, i) => (<div key={i} style={{width: q.span * pxPerWeek}} className="border-r border-slate-200 px-2 text-[9px] font-semibold bg-slate-50 text-slate-500 flex items-center justify-center">{q.label}</div>))}
+                            </div>
+                            <div className="flex h-5 border-b border-slate-100">
+                                {calendarData.months.map((m, i) => (<div key={i} style={{width: m.span * pxPerWeek}} className="border-r border-slate-200 px-2 text-[9px] bg-slate-50/50 text-slate-500 flex items-center justify-center">{m.label}</div>))}
+                            </div>
+                            <div className="flex h-10 border-b border-slate-100">
+                                {calendarData.weeks.map((w, i) => (
+                                    <div key={i} style={{width: pxPerWeek}} className="border-r border-slate-100 px-1 text-[8px] flex flex-col justify-center items-center text-center bg-white overflow-hidden whitespace-nowrap">
+                                        <span className="font-bold text-slate-600 leading-tight w-full truncate">{w.label}</span>
+                                        <span className="text-[7px] text-slate-400 leading-tight w-full truncate">{w.subLabel}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* EXPLICIT SIZING WRAPPER with min-h-full for infinite grid */}
+                        <div className="relative min-h-full" style={{ width: calendarData.weeks.length * pxPerWeek, height: totalContentHeight }}>
+                            
+                            {/* LAYER 1: GRID (Background) */}
+                            <svg 
+                                width="100%" 
+                                height="100%" 
+                                className="absolute top-0 left-0 pointer-events-none z-0"
+                            >
+                                <defs>
+                                    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 L0,0" fill="#94a3b8" /></marker>
+                                    <marker id="arrow-del" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 L0,0" fill="#ef4444" /></marker>
+                                </defs>
+                                {calendarData.weeks.map((w, i) => (<line key={`w-${i}`} x1={i*pxPerWeek} y1="0" x2={i*pxPerWeek} y2="100%" className="grid-line-week" />))}
+                                {calendarData.months.map((m, i) => (<line key={`m-${i}`} x1={calendarData.weeks.slice(0, m.startIdx).length * pxPerWeek} y1="0" x2={calendarData.weeks.slice(0, m.startIdx).length * pxPerWeek} y2="100%" className="grid-line-month" />))}
+                                {calendarData.quarters.map((q, i) => (<line key={`q-${i}`} x1={calendarData.weeks.slice(0, q.startIdx).length * pxPerWeek} y1="0" x2={calendarData.weeks.slice(0, q.startIdx).length * pxPerWeek} y2="100%" className="grid-line-quarter" />))}
+                            </svg>
+
+                            {/* LAYER 2: INTERACTION (Transparent Overlay with Tasks) */}
+                            <svg 
+                                id="gantt-svg" 
+                                width="100%" 
+                                height="100%" 
+                                className="absolute top-0 left-0 z-10"
+                                style={{ background: 'transparent' }}
+                            >
+                                {visibleTasks.map((task, idx) => 
+                                    task.dependencies.map(depId => {
+                                        const parent = visibleTasks.find(t => t.id === depId);
+                                        const parentIdx = visibleTasks.findIndex(t => t.id === depId);
+                                        if(!parent || parentIdx === -1) return null;
+                                        const x1 = (diffDays(viewStart, addDays(parent.start, parent.duration)) / 7) * pxPerWeek;
+                                        const y1 = parentIdx * ROW_HEIGHT + (ROW_HEIGHT/2);
+                                        const x2 = (diffDays(viewStart, task.start) / 7) * pxPerWeek;
+                                        const y2 = idx * ROW_HEIGHT + (ROW_HEIGHT/2);
+                                        const cp1 = x1 + 20; const cp2 = x2 - 20;
+                                        const d = `M ${x1} ${y1} C ${cp1} ${y1}, ${cp2} ${y2}, ${x2} ${y2}`;
+                                        return (
+                                            <g key={`${depId}-${task.id}`} onClick={() => tool === 'eraser' && deleteDependency(task.id, depId)} className="group/line" style={{pointerEvents: 'stroke'}}>
+                                                <path d={d} fill="none" className="dep-line-hitbox" />
+                                                <path d={d} stroke={tool === 'eraser' ? '#ef4444' : '#cbd5e1'} strokeWidth="2" fill="none" markerEnd={tool === 'eraser' ? 'url(#arrow-del)' : 'url(#arrow)'} className="dep-line pointer-events-none" />
+                                            </g>
+                                        );
+                                    })
+                                )}
+
+                                {dragState?.type === 'CONNECT' && <line x1={dragState.startX} y1={dragState.startY} x2={mousePos.x} y2={mousePos.y} stroke="#6366f1" strokeWidth="2" strokeDasharray="5,5" pointerEvents="none" />}
+
+                                {visibleTasks.map((task, idx) => {
+                                    const x = (diffDays(viewStart, task.start) / 7) * pxPerWeek;
+                                    const w = Math.max((task.duration / 7) * pxPerWeek, 5);
+                                    const y = idx * ROW_HEIGHT + 8;
+                                    const h = 24; 
+                                    const catKey = task.category || 'software';
+                                    const cat = CATEGORIES[catKey] || CATEGORIES.software;
+                                    const pWidth = w * ((task.progress || 0) / 100);
+                                    const isGroup = task.subtasks && task.subtasks.length > 0;
+                                    const isSelected = selectedTaskIds.has(task.id);
+
+                                    return (
+                                        <g key={task.id} className="task-group" onClick={(e) => { e.stopPropagation(); handleTaskClick(task.id, e); }}>
+                                            <rect x={x} y={y} width={w} height={h} rx="4"
+                                                fill={tool === 'eraser' ? '#fee2e2' : cat.fill}
+                                                stroke={tool === 'eraser' ? '#ef4444' : cat.stroke} strokeWidth="1"
+                                                className={`task-bar ${tool === 'eraser' ? 'cursor-eraser' : 'cursor-move'} ${isSelected ? 'selected-task' : ''}`}
+                                                onMouseDown={(e) => {
+                                                    if(tool === 'eraser') deleteTask(task.id);
+                                                    else {
+                                                        // Only start drag if not multi-selecting or if already selected
+                                                        // Actually drag logic handles single item, multi-drag is complex, so let's stick to single
+                                                        if (!e.ctrlKey && !e.metaKey) {
+                                                            saveHistory(); 
+                                                            setDragState({ type: 'MOVE', taskId: task.id, startX: e.clientX, initialStart: task.start, initialDur: task.duration });
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            {task.progress > 0 && tool !== 'eraser' && <rect x={x} y={y} width={pWidth} height={h} rx="4" fill="white" fillOpacity="0.3" className="progress-overlay" />}
+                                            
+                                            {/* REPLACED TEXT WITH FOREIGN OBJECT FOR TRUNCATION & CENTERED */}
+                                            <foreignObject x={x} y={y} width={w} height={h} style={{ pointerEvents: 'none' }}>
+                                                <div className="w-full h-full flex items-center justify-center px-2 overflow-hidden">
+                                                    <span className="text-white text-[10px] font-semibold truncate drop-shadow-md select-none w-full text-center">
+                                                        {w > 30 ? task.name : ''}
+                                                    </span>
+                                                </div>
+                                            </foreignObject>
+                                            
+                                            {isGroup && tool === 'cursor' && (
+                                                <path d={`M ${x} ${y+h} L ${x-5} ${y+h} L ${x-5} ${y} L ${x} ${y}`} fill="none" stroke={cat.stroke} strokeWidth="2" opacity="0.5" />
+                                            )}
+
+                                            {tool === 'cursor' && (
+                                                <React.Fragment>
+                                                    <rect x={x} y={y} width="8" height={h} className="resize-handle cursor-ew-resize"
+                                                        onMouseDown={(e) => { e.stopPropagation(); saveHistory(); setDragState({ type: 'RESIZE_L', taskId: task.id, startX: e.clientX, initialStart: task.start, initialDur: task.duration }); }} />
+                                                    <rect x={x + w - 8} y={y} width="8" height={h} className="resize-handle cursor-ew-resize"
+                                                        onMouseDown={(e) => { e.stopPropagation(); saveHistory(); setDragState({ type: 'RESIZE_R', taskId: task.id, startX: e.clientX, initialStart: task.start, initialDur: task.duration }); }} />
+                                                    <circle cx={x + w} cy={y + h/2} r="5" fill="white" stroke={cat.stroke} strokeWidth="2" className="connector-node cursor-connect"
+                                                        onMouseDown={(e) => { e.stopPropagation(); saveHistory(); const rect = e.target.getBoundingClientRect(); const svgRect = document.getElementById('gantt-svg').getBoundingClientRect(); setDragState({ type: 'CONNECT', sourceId: task.id, startX: rect.left+5-svgRect.left, startY: rect.top+5-svgRect.top }); }} />
+                                                    <circle cx={x} cy={y + h/2} r="5" fill="white" stroke={cat.stroke} strokeWidth="2" className="connector-node cursor-connect"
+                                                        onMouseUp={() => { if(dragState?.type === 'CONNECT') setDragState(prev => ({ ...prev, targetId: task.id })); }} />
+                                                </React.Fragment>
+                                            )}
+                                        </g>
+                                    );
+                                })}
+
+                                {/* Today Line */}
+                                <line 
+                                    x1={todayX} y1={0} 
+                                    x2={todayX} y2="100%" 
+                                    stroke="#ef4444" 
+                                    strokeWidth="2" 
+                                    strokeDasharray="6,4" 
+                                    className="pointer-events-none z-50"
+                                />
+                                {todayX >= 0 && (
+                                    <text x={todayX + 4} y={12} fill="#ef4444" fontSize="10" fontWeight="bold" className="pointer-events-none">Today</text>
+                                )}
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* CREDITS */}
+                <div className="absolute bottom-2 right-3 text-[10px] text-slate-400 font-medium select-none pointer-events-none opacity-60 z-50">
+                    Created by Ömer Ensar DURMUŞ & Gemini
+                </div>
+            </div>
+        );
+    }
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+</script>
+
+
+</body></html>
